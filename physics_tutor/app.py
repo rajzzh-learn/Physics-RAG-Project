@@ -99,25 +99,35 @@ if user_input := st.chat_input("Ask your Physics teacher …"):
     with st.chat_message("assistant"):
         with st.spinner("Thinking …"):
             chat_history = convert_history(st.session_state["messages"][:-1])
-            result = st.session_state["rag_chain"].invoke({
-                "question": user_input,
-                "chat_history": chat_history,
-            })
-            answer = result["answer"]
-            sources = result.get("source_documents", [])
+            try:
+                result = st.session_state["rag_chain"].invoke({
+                    "question": user_input,
+                    "chat_history": chat_history,
+                })
+                answer = result["answer"]
+                sources = result.get("source_documents", [])
 
-        st.markdown(answer)
+                st.markdown(answer)
 
-        # Show source references (collapsed)
-        if sources:
-            with st.expander("📎 Sources from your study material", expanded=False):
-                seen = set()
-                for doc in sources:
-                    src = doc.metadata.get("source", "Unknown")
-                    page = doc.metadata.get("page", "?")
-                    label = f"{src}  — page {page}"
-                    if label not in seen:
-                        st.markdown(f"- `{label}`")
-                        seen.add(label)
+                # Show source references (collapsed)
+                if sources:
+                    with st.expander("📎 Sources from your study material", expanded=False):
+                        seen = set()
+                        for doc in sources:
+                            src = doc.metadata.get("source", "Unknown")
+                            page = doc.metadata.get("page", "?")
+                            label = f"{src}  — page {page}"
+                            if label not in seen:
+                                st.markdown(f"- `{label}`")
+                                seen.add(label)
 
-    st.session_state["messages"].append({"role": "assistant", "content": answer})
+                st.session_state["messages"].append({"role": "assistant", "content": answer})
+            except Exception as e:
+                err_msg = str(e)
+                if "rate_limit" in err_msg.lower() or "quota" in err_msg.lower() or "429" in err_msg:
+                    st.error(
+                        "⚠️ **OpenAI Quota / Rate Limit Exceeded**: Your OpenAI account has run out of credits or reached its usage limit.\n\n"
+                        "👉 Please check your billing and prepaid credits on [OpenAI Billing](https://platform.openai.com/account/billing/overview)."
+                    )
+                else:
+                    st.error(f"⚠️ Error processing your request: {err_msg}")
