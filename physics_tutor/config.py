@@ -32,6 +32,8 @@ PDF_DIRS = [
     BASE_DIR / "PYQ",
     BASE_DIR / "book" / "leph1dd",
     BASE_DIR / "book" / "leph2dd",
+    BASE_DIR / "Competency based Questions",
+    BASE_DIR / "Secret Assignment",
 ]
 VECTOR_STORE_DIR = BASE_DIR / "physics_tutor" / "vectorstore"
 

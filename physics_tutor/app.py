@@ -54,6 +54,25 @@ with st.sidebar:
 6. Semiconductor Electronics
 """)
     st.divider()
+
+    # ── Study Material Links ──────────────────────────────────────────────
+    REPO = "https://github.com/rajeshkumar-nicht/Physics-RAG-Project/tree/main"
+    st.header("📚 Study Material")
+    st.markdown(f"""
+**Part 2 — Folders**
+
+| Folder | Link |
+|--------|------|
+| 📖 NCERT Book (Part 2) | [leph2dd]({REPO}/book/leph2dd) |
+| 🔬 Exemplar | [Exemplar]({REPO}/Exemplar) |
+| 📝 Notes | [Notes]({REPO}/Notes) |
+| ❓ Chapterwise Imp Questions | [Chapterwise imp questions]({REPO}/Chapterwise%20imp%20questions) |
+| 📋 PYQ | [PYQ]({REPO}/PYQ) |
+| 🎯 Competency Based Questions | [Competency based Questions]({REPO}/Competency%20based%20Questions) |
+| 🔐 Secret Assignment | [Secret Assignment]({REPO}/Secret%20Assignment) |
+""")
+    st.divider()
+
     st.markdown("**💡 Try asking:**")
     st.markdown("""
 - *Teach me Gauss's Law*
