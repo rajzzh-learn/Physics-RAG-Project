@@ -138,10 +138,16 @@ if user_input := st.chat_input("Ask your Physics teacher …"):
                 st.session_state["messages"].append({"role": "assistant", "content": answer})
             except Exception as e:
                 err_msg = str(e)
+                provider = get_config("LLM_PROVIDER", "openai").lower()
                 if "rate_limit" in err_msg.lower() or "quota" in err_msg.lower() or "429" in err_msg:
-                    st.error(
-                        "⚠️ **OpenAI Quota / Rate Limit Exceeded**: Your OpenAI account has run out of credits or reached its usage limit.\n\n"
-                        "👉 Please check your billing and prepaid credits on [OpenAI Billing](https://platform.openai.com/account/billing/overview)."
-                    )
+                    if provider == "groq":
+                        st.warning(
+                            "⚠️ **Groq Rate Limit (RPM/TPM)**: Groq's free tier has a per-minute token limit. Please wait ~10-15 seconds and try again."
+                        )
+                    else:
+                        st.error(
+                            "⚠️ **OpenAI Quota / Rate Limit Exceeded**: Your OpenAI account has run out of credits or reached its usage limit.\n\n"
+                            "👉 Please check your billing on [OpenAI Billing](https://platform.openai.com/account/billing/overview) or switch to Groq (free) in Secrets."
+                        )
                 else:
                     st.error(f"⚠️ Error processing your request: {err_msg}")
