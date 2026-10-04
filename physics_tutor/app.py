@@ -118,7 +118,12 @@ if user_input := st.chat_input("Ask your Physics teacher …"):
     # Get answer from RAG chain
     with st.chat_message("assistant"):
         with st.spinner("Thinking …"):
-            chat_history = convert_history(st.session_state["messages"][:-1])
+            # Limit history to the last 4 exchanges (8 messages) to stay well within free token limits
+            recent_messages = st.session_state["messages"][:-1]
+            if len(recent_messages) > 8:
+                recent_messages = recent_messages[-8:]
+            chat_history = convert_history(recent_messages)
+
             try:
                 result = st.session_state["rag_chain"].invoke({
                     "question": user_input,

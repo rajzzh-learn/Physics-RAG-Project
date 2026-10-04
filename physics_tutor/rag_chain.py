@@ -56,15 +56,16 @@ def _build_llm():
     elif provider == "groq":
         from langchain_openai import ChatOpenAI
         api_key = get_config("GROQ_API_KEY")
-        raw_model = get_config("GROQ_MODEL", "qwen/qwen3.8-27b")
+        raw_model = get_config("GROQ_MODEL", "openai/gpt-oss-120b")
 
         # Map deprecated or alias names to active Groq models
         model_aliases = {
-            "llama-3.3-70b-versatile": "qwen/qwen3.8-27b",
-            "llama-3.1-8b-instant": "qwen/qwen3.8-27b",
-            "llama3-70b-8192": "qwen/qwen3.8-27b",
-            "llama3-8b-8192": "qwen/qwen3.8-27b",
+            "llama-3.3-70b-versatile": "openai/gpt-oss-120b",
+            "llama-3.1-8b-instant": "openai/gpt-oss-20b",
+            "llama3-70b-8192": "openai/gpt-oss-120b",
+            "llama3-8b-8192": "openai/gpt-oss-20b",
             "mixtral-8x7b-32768": "openai/gpt-oss-120b",
+            "qwen/qwen3.8-27b": "openai/gpt-oss-120b",
         }
         model = model_aliases.get(raw_model, raw_model)
 
@@ -78,6 +79,7 @@ def _build_llm():
             base_url="https://api.groq.com/openai/v1",
             temperature=0.3,
             max_tokens=1024,
+            max_retries=3,
         )
     else:
         from langchain_openai import ChatOpenAI
