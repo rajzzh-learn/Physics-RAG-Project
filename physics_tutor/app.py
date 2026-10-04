@@ -2,6 +2,14 @@
 Streamlit chat interface for the Physics Tutor RAG Agent.
 Run with:  streamlit run physics_tutor/app.py
 """
+import sys
+from pathlib import Path
+
+# Ensure repo root is on sys.path for Streamlit Cloud
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 import streamlit as st
 from physics_tutor.ingest import build_vector_store
 from physics_tutor.rag_chain import build_rag_chain, convert_history
