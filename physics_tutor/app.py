@@ -56,14 +56,13 @@ with st.sidebar:
     st.divider()
 
     # ── Study Material Links ──────────────────────────────────────────────
-    REPO = "https://github.com/rajeshkumar-nicht/Physics-RAG-Project/tree/main"
+    REPO = "https://github.com/rajzzh-learn/Physics-RAG-Project/tree/main"
     st.header("📚 Study Material")
     st.markdown(f"""
-**Part 2 — Folders**
-
 | Folder | Link |
 |--------|------|
-| 📖 NCERT Book (Part 2) | [leph2dd]({REPO}/book/leph2dd) |
+| 📖 NCERT Book Part 1 | [leph1dd]({REPO}/book/leph1dd) |
+| 📖 NCERT Book Part 2 | [leph2dd]({REPO}/book/leph2dd) |
 | 🔬 Exemplar | [Exemplar]({REPO}/Exemplar) |
 | 📝 Notes | [Notes]({REPO}/Notes) |
 | ❓ Chapterwise Imp Questions | [Chapterwise imp questions]({REPO}/Chapterwise%20imp%20questions) |
