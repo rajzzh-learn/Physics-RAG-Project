@@ -29,6 +29,7 @@ with st.sidebar:
     st.header("🗂️ Chapters")
     st.markdown("""
 **Part 1**
+
 1. Electric Charges & Fields
 2. Electrostatic Potential & Capacitance
 3. Current Electricity
@@ -38,13 +39,16 @@ with st.sidebar:
 7. Alternating Current
 8. Electromagnetic Waves
 
+---
+
 **Part 2**
-9. Ray Optics & Optical Instruments
-10. Wave Optics
-11. Dual Nature of Radiation & Matter
-12. Atoms
-13. Nuclei
-14. Semiconductor Electronics
+
+1. Ray Optics & Optical Instruments
+2. Wave Optics
+3. Dual Nature of Radiation & Matter
+4. Atoms
+5. Nuclei
+6. Semiconductor Electronics
 """)
     st.divider()
     st.markdown("**💡 Try asking:**")
