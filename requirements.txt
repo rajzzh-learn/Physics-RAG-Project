@@ -1,6 +1,10 @@
 # Physics Tutor RAG Agent — Python dependencies
 # Tested on Python 3.14
 
+# PyTorch — CPU-only build (avoids MPS/CUDA NotImplementedError on Streamlit Cloud)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.7.1+cpu
+
 # Core LangChain (1.x LCEL API)
 langchain==1.4.3
 langchain-community==0.4.2

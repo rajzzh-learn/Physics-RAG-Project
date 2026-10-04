@@ -52,6 +52,7 @@ def build_vector_store(force_rebuild: bool = False) -> Chroma:
     embeddings = HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL,
         model_kwargs={"device": "cpu"},
+        encode_kwargs={"normalize_embeddings": True},
     )
 
     if VECTOR_STORE_DIR.exists() and not force_rebuild:
