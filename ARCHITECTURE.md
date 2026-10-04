@@ -90,7 +90,7 @@ graph TB
     subgraph RAGChain["🔗 RAG Chain  (rag_chain.py)"]
         R[MMR Retriever\ntop_k=6 · fetch_k=20]
         P[ChatPromptTemplate\nSystem + History + Question]
-        LLM{LLM Factory\n_build_llm\(\)}
+        LLM{LLM Factory\n_build_llm}
         O[StrOutputParser]
     end
 
