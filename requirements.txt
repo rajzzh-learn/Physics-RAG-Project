@@ -1,0 +1,28 @@
+# Physics Tutor RAG Agent — Python dependencies
+# Tested on Python 3.14
+
+# Core LangChain (1.x LCEL API)
+langchain==1.4.3
+langchain-community==0.4.2
+langchain-chroma==1.1.0
+langchain-huggingface==1.2.2
+langchain-openai==1.6.7
+
+# IBM watsonx.ai (alternative LLM backend)
+langchain-ibm==1.1.1
+ibm-watsonx-ai==1.8.0
+
+# Vector store
+chromadb==1.5.9
+
+# PDF loading
+pypdf==5.4.0
+
+# Embeddings
+sentence-transformers==4.1.0
+
+# UI
+streamlit==1.45.1
+
+# Utilities
+python-dotenv==1.1.0

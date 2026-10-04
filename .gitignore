@@ -1,0 +1,29 @@
+# ── Secrets (NEVER commit these) ──────────────────────────────────────────
+.env
+.streamlit/secrets.toml
+
+# ── Vector store (auto-generated — commit separately if pre-built) ─────────
+physics_tutor/vectorstore/
+
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Virtual environments ───────────────────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── macOS ──────────────────────────────────────────────────────────────────
+.DS_Store
+
+# ── IDE ────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
