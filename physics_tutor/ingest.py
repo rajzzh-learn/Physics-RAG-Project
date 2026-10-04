@@ -49,7 +49,10 @@ def build_vector_store(force_rebuild: bool = False) -> Chroma:
       commit the vectorstore/ directory before deploying.
     - Locally: set force_rebuild=True to re-ingest all PDFs from scratch.
     """
-    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+    embeddings = HuggingFaceEmbeddings(
+        model_name=EMBEDDING_MODEL,
+        model_kwargs={"device": "cpu"},
+    )
 
     if VECTOR_STORE_DIR.exists() and not force_rebuild:
         logger.info("Loading existing vector store from %s", VECTOR_STORE_DIR)
