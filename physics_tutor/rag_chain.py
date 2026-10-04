@@ -56,7 +56,22 @@ def _build_llm():
     elif provider == "groq":
         from langchain_openai import ChatOpenAI
         api_key = get_config("GROQ_API_KEY")
-        model = get_config("GROQ_MODEL", "llama-3.3-70b-versatile")
+        raw_model = get_config("GROQ_MODEL", "qwen/qwen3.8-27b")
+
+        # Map deprecated or alias names to active Groq models
+        model_aliases = {
+            "llama-3.3-70b-versatile": "qwen/qwen3.8-27b",
+            "llama-3.1-8b-instant": "qwen/qwen3.8-27b",
+            "llama3-70b-8192": "qwen/qwen3.8-27b",
+            "llama3-8b-8192": "qwen/qwen3.8-27b",
+            "mixtral-8x7b-32768": "openai/gpt-oss-120b",
+        }
+        model = model_aliases.get(raw_model, raw_model)
+
+        if not api_key:
+            raise ValueError(
+                "Missing `GROQ_API_KEY`. Please configure it in Streamlit Cloud Secrets (Settings -> Secrets) or in your `.env` file."
+            )
         return ChatOpenAI(
             model=model,
             api_key=api_key,
