@@ -48,7 +48,7 @@ def _build_llm():
             apikey=apikey,
             project_id=get_config("WATSONX_PROJECT_ID"),
             params={
-                "max_new_tokens": 1024,
+                "max_new_tokens": 4096,
                 "temperature": 0.3,
                 "repetition_penalty": 1.1,
             },
@@ -78,7 +78,7 @@ def _build_llm():
             api_key=api_key,
             base_url="https://api.groq.com/openai/v1",
             temperature=0.3,
-            max_tokens=1024,
+            max_tokens=4096,
             max_retries=3,
         )
     else:
@@ -93,7 +93,7 @@ def _build_llm():
             model=model,
             api_key=api_key,
             temperature=0.3,
-            max_tokens=1024,
+            max_tokens=4096,
         )
 
 
