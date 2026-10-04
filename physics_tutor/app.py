@@ -11,6 +11,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 import streamlit as st
+from physics_tutor.config import get_config
 from physics_tutor.ingest import build_vector_store
 from physics_tutor.rag_chain import build_rag_chain, convert_history
 
@@ -26,6 +27,8 @@ st.caption("Powered by your NCERT notes, exemplar, and PYQs — 2027 Board Exam 
 
 # ── Sidebar ────────────────────────────────────────────────────────────────
 with st.sidebar:
+    current_provider = get_config("LLM_PROVIDER", "openai").lower()
+    st.caption(f"🤖 **Active Provider**: `{current_provider.upper()}`")
     st.header("🗂️ Chapters")
     st.markdown("""
 **Part 1**
@@ -72,16 +75,19 @@ if "vector_store" not in st.session_state:
     with st.spinner("⚙️ Loading your study material … first load takes ~1 min"):
         st.session_state["vector_store"] = build_vector_store(force_rebuild=False)
 
-try:
-    if "rag_chain" not in st.session_state:
+# Re-instantiate if provider changed or not initialized
+target_provider = get_config("LLM_PROVIDER", "openai").lower()
+if "rag_chain" not in st.session_state or st.session_state.get("_active_provider") != target_provider:
+    try:
         st.session_state["rag_chain"] = build_rag_chain(st.session_state["vector_store"])
-except Exception as e:
-    st.error(
-        f"⚠️ **LLM Initialization Error**: {e}\n\n"
-        "👉 If using OpenAI, please ensure `OPENAI_API_KEY` is added to Streamlit Cloud Settings $\\rightarrow$ Secrets.\n"
-        "👉 Or add `LLM_PROVIDER = \"groq\"` and `GROQ_API_KEY = \"gsk_...\"` for free unlimited usage."
-    )
-    st.stop()
+        st.session_state["_active_provider"] = target_provider
+    except Exception as e:
+        st.error(
+            f"⚠️ **LLM Initialization Error**: {e}\n\n"
+            "👉 If using Groq, ensure `LLM_PROVIDER = \"groq\"` and `GROQ_API_KEY = \"gsk_...\"` in Streamlit Secrets.\n"
+            "👉 If using OpenAI, please ensure `OPENAI_API_KEY` is added to Streamlit Secrets."
+        )
+        st.stop()
 
 # ── Chat history ───────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
