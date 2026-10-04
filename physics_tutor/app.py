@@ -118,10 +118,10 @@ if user_input := st.chat_input("Ask your Physics teacher …"):
     # Get answer from RAG chain
     with st.chat_message("assistant"):
         with st.spinner("Thinking …"):
-            # Limit history to the last 4 exchanges (8 messages) to stay well within free token limits
+            # Limit chat history to the last 2 turns (4 messages) to minimize prompt token footprint
             recent_messages = st.session_state["messages"][:-1]
-            if len(recent_messages) > 8:
-                recent_messages = recent_messages[-8:]
+            if len(recent_messages) > 4:
+                recent_messages = recent_messages[-4:]
             chat_history = convert_history(recent_messages)
 
             try:
