@@ -17,6 +17,7 @@ chromadb==1.5.9
 
 # PDF loading
 pypdf==5.4.0
+cryptography>=50.0.0
 
 # Embeddings
 sentence-transformers==4.1.0

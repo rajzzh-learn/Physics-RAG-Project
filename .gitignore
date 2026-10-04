@@ -3,7 +3,7 @@
 .streamlit/secrets.toml
 
 # ── Vector store (auto-generated — commit separately if pre-built) ─────────
-physics_tutor/vectorstore/
+# physics_tutor/vectorstore/
 
 # ── Python ────────────────────────────────────────────────────────────────
 __pycache__/

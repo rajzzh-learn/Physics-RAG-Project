@@ -5,6 +5,9 @@ and persists a ChromaDB vector store for retrieval.
 """
 import logging
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()  # load .env for local runs
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
