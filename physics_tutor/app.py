@@ -64,10 +64,20 @@ with st.sidebar:
         st.success("Vector store rebuilt!")
 
 # ── Init vector store & chain (cached in session state) ───────────────────
-if "rag_chain" not in st.session_state:
+if "vector_store" not in st.session_state:
     with st.spinner("⚙️ Loading your study material … first load takes ~1 min"):
-        vs = build_vector_store(force_rebuild=False)
-        st.session_state["rag_chain"] = build_rag_chain(vs)
+        st.session_state["vector_store"] = build_vector_store(force_rebuild=False)
+
+try:
+    if "rag_chain" not in st.session_state:
+        st.session_state["rag_chain"] = build_rag_chain(st.session_state["vector_store"])
+except Exception as e:
+    st.error(
+        f"⚠️ **LLM Initialization Error**: {e}\n\n"
+        "👉 If using OpenAI, please ensure `OPENAI_API_KEY` is added to Streamlit Cloud Settings $\\rightarrow$ Secrets.\n"
+        "👉 Or add `LLM_PROVIDER = \"groq\"` and `GROQ_API_KEY = \"gsk_...\"` for free unlimited usage."
+    )
+    st.stop()
 
 # ── Chat history ───────────────────────────────────────────────────────────
 if "messages" not in st.session_state:

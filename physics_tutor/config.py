@@ -7,9 +7,9 @@ import os
 from pathlib import Path
 
 
-def _get(key: str, default: str = "") -> str:
+def get_config(key: str, default: str = "") -> str:
     """
-    Resolve a config value:
+    Resolve a config value dynamically at runtime:
     1. st.secrets  — when running on Streamlit Community Cloud
     2. os.environ  — local .env / shell exports
     3. default     — fallback
@@ -36,21 +36,9 @@ PDF_DIRS = [
 VECTOR_STORE_DIR = BASE_DIR / "physics_tutor" / "vectorstore"
 
 # ── Embedding & LLM ────────────────────────────────────────────────────────
-EMBEDDING_MODEL = _get("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-
-LLM_PROVIDER = _get("LLM_PROVIDER", "openai")   # "openai" | "watsonx"
-
-# OpenAI
-OPENAI_API_KEY = _get("OPENAI_API_KEY")
-OPENAI_MODEL = _get("OPENAI_MODEL", "gpt-4o")
-
-# IBM watsonx.ai
-WATSONX_API_KEY = _get("WATSONX_API_KEY")
-WATSONX_PROJECT_ID = _get("WATSONX_PROJECT_ID")
-WATSONX_URL = _get("WATSONX_URL", "https://us-south.ml.cloud.ibm.com")
-WATSONX_MODEL = _get("WATSONX_MODEL", "ibm/granite-3-3-8b-instruct")
+EMBEDDING_MODEL = get_config("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 
 # ── Retrieval ──────────────────────────────────────────────────────────────
-RETRIEVER_TOP_K = int(_get("RETRIEVER_TOP_K", "6"))
-CHUNK_SIZE = int(_get("CHUNK_SIZE", "800"))
-CHUNK_OVERLAP = int(_get("CHUNK_OVERLAP", "120"))
+RETRIEVER_TOP_K = int(get_config("RETRIEVER_TOP_K", "6"))
+CHUNK_SIZE = int(get_config("CHUNK_SIZE", "800"))
+CHUNK_OVERLAP = int(get_config("CHUNK_OVERLAP", "120"))

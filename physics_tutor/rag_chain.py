@@ -9,13 +9,7 @@ from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.messages import HumanMessage, AIMessage
 
 from physics_tutor.config import (
-    LLM_PROVIDER,
-    OPENAI_API_KEY,
-    OPENAI_MODEL,
-    WATSONX_API_KEY,
-    WATSONX_PROJECT_ID,
-    WATSONX_URL,
-    WATSONX_MODEL,
+    get_config,
     RETRIEVER_TOP_K,
 )
 
@@ -42,25 +36,45 @@ def _format_docs(docs) -> str:
 
 
 def _build_llm():
-    """Instantiate the LLM based on LLM_PROVIDER env variable."""
-    if LLM_PROVIDER == "watsonx":
+    """Instantiate the LLM based on dynamic configuration."""
+    provider = get_config("LLM_PROVIDER", "openai").lower()
+
+    if provider == "watsonx":
         from langchain_ibm import WatsonxLLM
+        apikey = get_config("WATSONX_APIKEY") or get_config("WATSONX_API_KEY")
         return WatsonxLLM(
-            model_id=WATSONX_MODEL,
-            url=WATSONX_URL,
-            apikey=WATSONX_API_KEY,
-            project_id=WATSONX_PROJECT_ID,
+            model_id=get_config("WATSONX_MODEL_ID") or get_config("WATSONX_MODEL", "ibm/granite-3-8b-instruct"),
+            url=get_config("WATSONX_URL", "https://us-south.ml.cloud.ibm.com"),
+            apikey=apikey,
+            project_id=get_config("WATSONX_PROJECT_ID"),
             params={
                 "max_new_tokens": 1024,
                 "temperature": 0.3,
                 "repetition_penalty": 1.1,
             },
         )
+    elif provider == "groq":
+        from langchain_openai import ChatOpenAI
+        api_key = get_config("GROQ_API_KEY")
+        model = get_config("GROQ_MODEL", "llama-3.3-70b-versatile")
+        return ChatOpenAI(
+            model=model,
+            api_key=api_key,
+            base_url="https://api.groq.com/openai/v1",
+            temperature=0.3,
+            max_tokens=1024,
+        )
     else:
         from langchain_openai import ChatOpenAI
+        api_key = get_config("OPENAI_API_KEY")
+        model = get_config("OPENAI_MODEL", "gpt-4o")
+        if not api_key:
+            raise ValueError(
+                "Missing `OPENAI_API_KEY`. Please configure it in Streamlit Cloud Secrets (Settings -> Secrets) or provide it via sidebar."
+            )
         return ChatOpenAI(
-            model=OPENAI_MODEL,
-            api_key=OPENAI_API_KEY,
+            model=model,
+            api_key=api_key,
             temperature=0.3,
             max_tokens=1024,
         )
