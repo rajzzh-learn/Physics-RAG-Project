@@ -13,6 +13,10 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
+import os
+
+# Force CPU — avoids NotImplementedError on Streamlit Cloud (no MPS/CUDA)
+os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", "/tmp/st_cache")
 
 from physics_tutor.config import (
     PDF_DIRS,
