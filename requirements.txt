@@ -24,6 +24,10 @@ cryptography>=50.0.0
 sentence-transformers==3.4.1
 
 # UI
+
+# Image processing & clipboard paste (file attachment feature)
+Pillow==11.3.0
+streamlit-paste-button==0.1.2
 streamlit==1.45.1
 
 # Utilities
