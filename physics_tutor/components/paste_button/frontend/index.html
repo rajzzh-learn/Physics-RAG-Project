@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="./streamlit-component-lib.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: transparent; display: flex; align-items: center; }
+    #paste-btn {
+      width: 100%;
+      padding: 0.45rem 0.9rem;
+      border: none;
+      border-radius: 0.4rem;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.15s ease;
+      white-space: nowrap;
+    }
+    #status {
+      margin-top: 4px;
+      font-size: 11px;
+      opacity: 0.75;
+      min-height: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div style="width:100%">
+    <button id="paste-btn">📋 Paste image</button>
+    <div id="status"></div>
+  </div>
+  <script src="./main.js"></script>
+</body>
+</html>
