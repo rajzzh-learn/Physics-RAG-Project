@@ -144,43 +144,48 @@ for msg in st.session_state["messages"]:
         st.markdown(msg["content"])
 
 
-# -- Helper: vision LLM call -----------------------------------------------
+# ── Helper: call vision-capable LLM directly (image path) ──────────────
 def _ask_vision_llm(question: str, image_data_uri: str, context_text: str) -> str:
-    provider = get_config("LLM_PROVIDER", "openai").lower()
-    vision_content = [
-        {
-            "type": "text",
-            "text": (
-                "You are an expert Class 12 CBSE Physics teacher.\n\n"
-                f"Context from the student's study materials:\n{context_text}\n\n"
-                f"The student has attached an image and asks:\n{question}"
-            ),
-        },
-        {"type": "image_url", "image_url": {"url": image_data_uri}},
-    ]
-    if provider == "groq":
-        from openai import OpenAI
-        client = OpenAI(api_key=get_config("GROQ_API_KEY"), base_url="https://api.groq.com/openai/v1")
-        resp = client.chat.completions.create(
-            model=get_config("GROQ_VISION_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct"),
-            messages=[{"role": "user", "content": vision_content}],
-            max_tokens=4096, temperature=0.3,
-        )
-        return resp.choices[0].message.content
-    elif provider == "openai":
-        from openai import OpenAI
-        client = OpenAI(api_key=get_config("OPENAI_API_KEY"))
-        resp = client.chat.completions.create(
-            model=get_config("OPENAI_MODEL", "gpt-4o"),
-            messages=[{"role": "user", "content": vision_content}],
-            max_tokens=4096, temperature=0.3,
-        )
-        return resp.choices[0].message.content
-    else:
+    """
+    Send a multimodal (text + image) message to Google Gemini Flash (free tier).
+    Vision is always handled by Gemini regardless of LLM_PROVIDER,
+    since Groq has no vision models and OpenAI requires paid credits.
+    Falls back gracefully when GOOGLE_API_KEY is not set.
+    """
+    import base64, re as _re
+    from google import genai
+    from google.genai import types
+
+    google_key = get_config("GOOGLE_API_KEY")
+    if not google_key:
         return (
-            "⚠️ **Image vision is not supported for the `watsonx` provider.** "
-            "Please switch to `groq` or `openai`, or describe your question in text."
+            "⚠️ **Image analysis requires a `GOOGLE_API_KEY`** (free).\n\n"
+            "👉 Get one at https://aistudio.google.com/app/apikey — it's free, no billing needed.\n"
+            "Then add `GOOGLE_API_KEY = \"AIza...\"` to your `.env` file or Streamlit Secrets and reload the app."
         )
+
+    # Extract raw base64 bytes from the data URI (data:<mime>;base64,<data>)
+    match = _re.match(r"data:(?P<mime>[^;]+);base64,(?P<data>.+)", image_data_uri)
+    if not match:
+        return "⚠️ Could not parse the attached image. Please try uploading it again."
+    mime_type = match.group("mime")
+    image_bytes = base64.b64decode(match.group("data"))
+
+    prompt = (
+        "You are an expert Class 12 CBSE Physics teacher.\n\n"
+        f"Context from the student's study materials:\n{context_text}\n\n"
+        f"The student has attached an image and asks:\n{question}"
+    )
+
+    client = genai.Client(api_key=google_key)
+    response = client.models.generate_content(
+        model="gemini-3.5-flash-lite",
+        contents=[
+            prompt,
+            types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
+        ],
+    )
+    return response.text
 
 
 # -- Input area: file uploader + paste button + chat input -----------------

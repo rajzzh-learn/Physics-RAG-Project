@@ -27,6 +27,7 @@ sentence-transformers==3.4.1
 
 # Image processing (file attachment feature)
 Pillow==11.3.0
+google-genai==2.29.0
 streamlit==1.45.1
 
 # Utilities
