@@ -22,7 +22,7 @@ cryptography>=50.0.0
 
 # Embeddings
 sentence-transformers==3.4.1
-
+torch>=2.6.0
 # UI
 
 # Image processing (file attachment feature)
