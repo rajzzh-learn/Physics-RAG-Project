@@ -31,7 +31,7 @@ st.set_page_config(
 )
 
 st.title("⚛️ Class 12 Physics Tutor")
-st.caption("Powered by your NCERT notes, exemplar, and PYQs — 2027 Board Exam Edition")
+st.caption("Powered by NCERT textbooks & solutions, exemplar, notes, SSM test papers, and PYQs — 2027 Board Exam Edition")
 
 # -- Sidebar ----------------------------------------------------------------
 with st.sidebar:
@@ -77,6 +77,8 @@ with st.sidebar:
 | 📋 PYQ | [PYQ]({REPO}/PYQ) |
 | 🎯 Competency Based Questions | [Competency based Questions]({REPO}/Competency%20based%20Questions) |
 | 🔐 Secret Assignment | [Secret Assignment]({REPO}/Secret%20Assignment) |
+| 💡 NCERT Solutions | [Ncert Solutions]({REPO}/Ncert%20Solutions) |
+| 📄 SSM Question Papers | [SSM Question Paper so far]({REPO}/SSM%20Question%20Paper%20so%20far) |
 """)
     st.divider()
 
@@ -84,8 +86,9 @@ with st.sidebar:
     st.markdown("""
 - *Teach me Gauss's Law*
 - *Give me 5 HOTS questions on Capacitance*
-- *What is the Bohr model?*
+- *Explain NCERT exercise question on Electric Dipole*
 - *Solve: A capacitor of 4μF …*
+- *What questions appeared in the SSM test papers?*
 - *What were the most repeated PYQ topics in 2024?*
 """)
     st.divider()

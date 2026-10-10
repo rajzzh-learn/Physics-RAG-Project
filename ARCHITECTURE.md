@@ -56,6 +56,8 @@ Physics RAG Project/
 ├── Chapterwise imp questions/   # Important question banks (PDFs)
 ├── Competency based Questions/  # CBQ / case-study materials (PDFs)
 ├── Secret Assignment/           # Additional assignment PDFs
+├── Ncert Solutions/             # NCERT Chapter-wise exercise solutions (PDFs)
+├── SSM Question Paper so far/   # SSM school exam & test question papers (PDFs)
 ├── .streamlit/
 │   ├── config.toml              # UI theme & server settings
 │   └── secrets.toml.example     # Secret keys template
@@ -78,6 +80,8 @@ graph TB
         B5[Chapterwise Imp Questions]
         B6[Competency Based Questions]
         B7[Secret Assignment]
+        B8[NCERT Solutions]
+        B9[SSM Question Papers]
     end
 
     subgraph Ingestion["⚙️ Ingestion Pipeline  (ingest.py)"]

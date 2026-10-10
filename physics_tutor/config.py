@@ -34,6 +34,8 @@ PDF_DIRS = [
     BASE_DIR / "book" / "leph2dd",
     BASE_DIR / "Competency based Questions",
     BASE_DIR / "Secret Assignment",
+    BASE_DIR / "Ncert Solutions",
+    BASE_DIR / "SSM Question Paper so far",
 ]
 VECTOR_STORE_DIR = BASE_DIR / "physics_tutor" / "vectorstore"
 

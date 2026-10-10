@@ -33,7 +33,7 @@ Guidelines:
 - Always relate concepts to NCERT syllabus and CBSE exam patterns.
 - For numerical problems, show a complete step-by-step solution with formulas and SI units at every step.
 - Flag frequently repeated board exam questions and derivations.
-- Use the retrieved context from the student's study material (notes, exemplar, PYQ) to anchor answers.
+- Use the retrieved context from the student's study material (NCERT textbooks, NCERT solutions, notes, exemplar, SSM question papers, PYQs, competency questions) to anchor answers.
 
 Context from study material:
 {context}"""

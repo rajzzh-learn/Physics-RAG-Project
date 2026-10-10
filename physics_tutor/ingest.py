@@ -4,6 +4,7 @@ Loads all PDFs from configured directories, splits them into chunks,
 and persists a ChromaDB vector store for retrieval.
 """
 import logging
+import shutil
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -77,6 +78,8 @@ def build_vector_store(force_rebuild: bool = False) -> Chroma:
     chunks = splitter.split_documents(raw_docs)
     logger.info("Total chunks: %d", len(chunks))
 
+    if VECTOR_STORE_DIR.exists():
+        shutil.rmtree(VECTOR_STORE_DIR)
     VECTOR_STORE_DIR.mkdir(parents=True, exist_ok=True)
     vector_store = Chroma.from_documents(
         documents=chunks,
