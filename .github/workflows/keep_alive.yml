@@ -1,23 +1,90 @@
-name: Keep Physics Streamlit App Alive
+name: Keep Streamlit Apps Alive
 
 on:
   schedule:
-    # Pings the app every 6 hours to prevent Streamlit sleep (threshold ~12 hrs)
-    - cron: "0 */6 * * *"
-  workflow_dispatch: # allows manual trigger from GitHub Actions tab
+    # Runs every 3 hours at minute 17 (off-peak minute to avoid GitHub Actions congestion)
+    - cron: "17 */3 * * *"
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  ping:
+  keep_alive:
+    name: Ping & Wake All Apps
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: Ping Physics Streamlit app
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Playwright & Chromium
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            --max-time 30 \
-            "https://physics-rag-project-tanishaa.streamlit.app/")
-          echo "HTTP status: $STATUS"
-          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
-            echo "App is alive."
-          else
-            echo "Warning: unexpected status $STATUS"
-          fi
+          pip install --no-cache-dir playwright
+          playwright install --with-deps chromium
+
+      - name: Ping and Wake Apps via Headless Browser
+        run: |
+          python - << 'EOF'
+          import asyncio
+          import sys
+          from playwright.async_api import async_playwright
+
+          APPS = {
+              "Physics": "https://physics-rag-project-tanishaa.streamlit.app/",
+              "Chemistry": "https://chemistry-rag-project-tanishaa.streamlit.app/",
+              "Maths": "https://maths-rag-project-tanishaa.streamlit.app/",
+              "CS": "https://cs-rag-project-tanishaa.streamlit.app/",
+          }
+
+          async def check_and_wake_app(browser, name, url):
+              print(f"\n==========================================")
+              print(f"🔍 Checking [{name}]: {url}")
+              context = await browser.new_context(
+                  user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+              )
+              page = await context.new_page()
+              try:
+                  # Navigate to the app URL
+                  response = await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                  print(f"  HTTP Response status: {response.status if response else 'N/A'}")
+
+                  # Wait a few seconds for Streamlit JavaScript / UI to render
+                  await page.wait_for_timeout(6000)
+
+                  # Look for the wake-up button if the app is asleep
+                  wake_button = page.locator('button:has-text("Yes, get this app back up!")')
+                  button_count = await wake_button.count()
+
+                  if button_count > 0 and await wake_button.first.is_visible():
+                      print(f"  ⚠️  [{name}] has gone to sleep. Clicking 'Yes, get this app back up!' button...")
+                      await wake_button.first.click()
+                      print(f"  ⏳  Wake button clicked. Waiting 15s for container reboot...")
+                      await page.wait_for_timeout(15000)
+                      print(f"  ✅  [{name}] wake-up signal sent successfully.")
+                  else:
+                      # If already awake, wait an additional 5s to ensure WebSocket connection registers
+                      print(f"  ✅  [{name}] is active. Keeping session open to register activity...")
+                      await page.wait_for_timeout(5000)
+                      print(f"  ✨  [{name}] session registered.")
+              except Exception as err:
+                  print(f"  ❌ Error processing [{name}]: {err}")
+              finally:
+                  await page.close()
+                  await context.close()
+
+          async def main():
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(
+                      headless=True,
+                      args=["--no-sandbox", "--disable-setuid-sandbox"]
+                  )
+                  for name, url in APPS.items():
+                      await check_and_wake_app(browser, name, url)
+                  await browser.close()
+              print("\n🎉 All apps checked successfully.")
+
+          if __name__ == "__main__":
+              asyncio.run(main())
+          EOF
