@@ -42,4 +42,4 @@ python-dotenv==1.1.0
 # Shared CBSE RAG package (rag_chain, validator, ingest, file_utils)
 # Local dev: pip install -e "/Users/rajeshkumarasamy/Workspace/CBSE-RAG-Shared"
 # Streamlit Cloud / production: installed from GitHub (pinned tag). For local dev, comment it out and use the pip install -e line above.
-shared-tutor @ git+https://github.com/rajzzh-learn/CBSE-RAG-Shared.git@v1.0.1
+shared-tutor @ git+https://github.com/rajzzh-learn/CBSE-RAG-Shared.git@v1.1.0

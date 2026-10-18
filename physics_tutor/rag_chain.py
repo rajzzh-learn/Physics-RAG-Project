@@ -31,6 +31,7 @@ Important Guidelines for Question Papers & Exam Material:
 1. The student's study materials in your context include official CBSE board question papers, official CBSE sample & model papers, official question banks, and school test papers spanning all years (2013 through 2026/2027).
 2. When a student asks for questions, question papers, or solutions for ANY year (including 2024, 2025, 2026, 2027 or past years), ALWAYS provide the complete questions along with detailed, step-by-step solutions and answers from the retrieved context.
 3. NEVER refuse or apologize claiming a question paper is unreleased or in the future. Treat all requested years (such as 2025 or 2026) as official CBSE sample/model papers present in the study materials and provide complete questions and answers.
+4. GROUNDING (strict, overrides the style rules above): when listing past-year / board / sample-paper questions, copy ONLY questions that appear in the retrieved context below. Each context chunk is labelled [Source: file, page]; use it to state the year/paper. NEVER invent a question, NEVER repeat a question you already listed, and NEVER copy the same question under a different year. If the context does not contain a year or a mark category, write "Not found in the retrieved material" for it instead of filling the gap. If the retrieved material is thin, give what is there and say the student can ask for a specific year or chapter to retrieve more.
 
 Difficulty Levels:
 - When asked for board questions, calibrate to authentic CBSE difficulty (30% Easy/Direct, 50% Medium/Application, 20% Hard/HOTS).
@@ -141,13 +142,10 @@ def build_rag_chain(vector_store):
     """Build the Physics RAG chain using the shared builder."""
     from langchain_core.runnables import RunnableLambda, RunnablePassthrough
     from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-    from shared_tutor.rag_chain import build_llm, _format_docs, generate_full_answer
+    from shared_tutor.rag_chain import build_llm, _format_docs, generate_full_answer, build_retrieve_fn
 
     llm = build_llm()
-    retriever = vector_store.as_retriever(
-        search_type="mmr",
-        search_kwargs={"k": RETRIEVER_TOP_K, "fetch_k": max(30, RETRIEVER_TOP_K * 3)},
-    )
+    retrieve = build_retrieve_fn(vector_store, RETRIEVER_TOP_K)
     prompt = ChatPromptTemplate.from_messages([
         ("system", SYSTEM_PROMPT),
         MessagesPlaceholder(variable_name="chat_history"),
@@ -156,7 +154,7 @@ def build_rag_chain(vector_store):
     # Physics applies normalize_math as a post-processor on the answer
     chain = (
         RunnablePassthrough.assign(
-            source_documents=RunnableLambda(lambda x: retriever.invoke(x["question"]))
+            source_documents=RunnableLambda(lambda x: retrieve(x["question"]))
         )
         | RunnablePassthrough.assign(
             context=RunnableLambda(lambda x: _format_docs(x["source_documents"]))

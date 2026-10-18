@@ -544,7 +544,7 @@ The LLM logic is no longer duplicated per subject. It lives in the
 ```
 Layer 1 — Retrieve   ChromaDB MMR search over this subject's PDFs
 Layer 2 — Generate   LLM (Groq / OpenAI / watsonx) answers using the retrieved context
-Layer 3 — Validate   Gemini fact-checks the answer (opt-in, ENABLE_VALIDATION=true)
+Layer 3 — Validate   Gemini and/or OpenAI GPT-4o fact-check the answer, with automatic fallback (opt-in, ENABLE_VALIDATION=true)
 ```
 
 | Concern | Where | Behaviour |
@@ -553,9 +553,10 @@ Layer 3 — Validate   Gemini fact-checks the answer (opt-in, ENABLE_VALIDATION=
 | Long answers | `shared_tutor.rag_chain.generate_full_answer()` | If the model stops because of the token limit (`finish_reason=length`), it is asked to continue (up to 4 times) and the parts are joined, so long answers are not cut off. |
 | Rate limits | `invoke_with_retry()` | Waits for the provider-advertised delay and retries. |
 | Chat history | `convert_history()` | Recent turns kept verbatim, older turns compacted to a character budget. |
-| Validation | `shared_tutor.validator.validate_answer()` | Gemini checks the answer against the retrieved context. Answers over 6000 characters are not validated (never clipped). Skipped if `GOOGLE_API_KEY` is missing. |
+| Validation | `shared_tutor.validator.validate_answer()` | Multi-LLM: Gemini and OpenAI GPT-4o check the answer against the retrieved context (`VALIDATION_PROVIDER` = first choice, the other is the automatic fallback; each needs its own API key). Long answers are checked in ~5000-character sections, so nothing is clipped. The app shows ✅ verified / ⚠️ corrected, or the reason it was not verified. A validator is also told to remove any past-paper question that is not in the source material or is repeated. |
+| Past-paper questions | `build_retrieve_fn()` + prompt rule 4 | Year-wise / PYQ / question-paper queries retrieve 14 chunks instead of 6 (`PYQ_RETRIEVER_TOP_K`). Every chunk is labelled `[Source: file, page]`. The prompt forbids inventing or repeating questions and requires "Not found in the retrieved material" for gaps. |
 | Embeddings | `<subject>_tutor/ingest.py` | ONNX `all-MiniLM-L6-v2` (`SafeMiniLMEmbeddings`) — same vectors as the HuggingFace model, no PyTorch, avoids the Streamlit Cloud meta-device `NotImplementedError`. Existing vector stores remain valid. |
 
 Required secrets / environment variables (see `.env.example`):
 `LLM_PROVIDER`, `GROQ_API_KEY` (or `OPENAI_API_KEY` / `WATSONX_*`),
-`GOOGLE_API_KEY` and `ENABLE_VALIDATION=true` for Layer 3.
+`ENABLE_VALIDATION=true` plus `GOOGLE_API_KEY` (Gemini) and/or `OPENAI_API_KEY` (GPT-4o) for Layer 3 — set both for fallback; `VALIDATION_PROVIDER` picks the first choice; optional `OPENAI_VALIDATOR_MODEL`, `PYQ_RETRIEVER_TOP_K`.
