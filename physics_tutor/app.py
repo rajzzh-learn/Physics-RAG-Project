@@ -29,6 +29,7 @@ from physics_tutor.file_utils import (
     SUPPORTED_EXTS,
 )
 from physics_tutor.components.paste_button import paste_image_button
+from shared_tutor.validator import validate_answer
 
 # -- Page config ------------------------------------------------------------
 st.set_page_config(
@@ -212,7 +213,7 @@ def _ask_vision_llm(
 
     client = genai.Client(api_key=google_key)
     response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
+        model="gemini-2.0-flash-lite",
         contents=[prompt, *parts],
     )
     return response.text
@@ -292,9 +293,10 @@ if user_input := st.chat_input("Ask your Physics teacher …"):
         with st.spinner("Thinking …"):
             # Keep the prompt small: Groq free tier allows ~8000 tokens/minute
             # (input + reserved output), so only the last 2 turns, truncated.
-            recent_messages = st.session_state["messages"][:-1][-2:]
+            # Pass full history — convert_history manages the token budget automatically
+            recent_messages = st.session_state["messages"][:-1]
             clean_history = [
-                {"role": m["role"], "content": trim_text(m["content"], 1500)}
+                {"role": m["role"], "content": m["content"]}
                 for m in recent_messages
             ]
             chat_history = convert_history(clean_history)
@@ -326,6 +328,23 @@ if user_input := st.chat_input("Ask your Physics teacher …"):
                     answer = result["answer"]
                     sources = result.get("source_documents", [])
 
+                # ── Layer 3: Gemini validation ──────────────────────
+                context_for_validation = "\n\n".join(
+                    d.page_content for d in sources[:4]
+                ) if sources else ""
+                validation = validate_answer(
+                    subject="Physics",
+                    question=user_input,
+                    context=context_for_validation,
+                    answer=answer,
+                )
+                answer = validation.answer
+                if validation.status == "corrected":
+                    st.warning("⚠️ **Answer corrected by Gemini validator**")
+                    for corr in validation.corrections:
+                        st.caption(f"• {corr}")
+                elif validation.status == "verified":
+                    st.success("✅ Answer verified")
                 render_md(answer)
 
                 if sources:
