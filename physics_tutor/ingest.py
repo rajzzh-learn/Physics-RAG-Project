@@ -12,7 +12,8 @@ load_dotenv()  # load .env for local runs
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_core.embeddings import Embeddings
+import chromadb.utils.embedding_functions as ef
 from langchain_chroma import Chroma
 import os
 
@@ -46,6 +47,21 @@ def load_pdfs(pdf_dirs: list[Path]) -> list:
     return docs
 
 
+class SafeMiniLMEmbeddings(Embeddings):
+    """ONNX all-MiniLM-L6-v2 embeddings (same vectors as the HuggingFace model).
+
+    Avoids the PyTorch meta-device NotImplementedError on Streamlit Cloud.
+    """
+    def __init__(self):
+        self._ef = ef.ONNXMiniLM_L6_V2()
+
+    def embed_documents(self, texts):
+        return [[float(x) for x in v] for v in self._ef(texts)]
+
+    def embed_query(self, text):
+        return [float(x) for x in self._ef([text])[0]]
+
+
 def build_vector_store(force_rebuild: bool = False) -> Chroma:
     """
     Build (or load) the ChromaDB vector store.
@@ -54,11 +70,7 @@ def build_vector_store(force_rebuild: bool = False) -> Chroma:
       commit the vectorstore/ directory before deploying.
     - Locally: set force_rebuild=True to re-ingest all PDFs from scratch.
     """
-    embeddings = HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL,
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True},
-    )
+    embeddings = SafeMiniLMEmbeddings()
 
     if VECTOR_STORE_DIR.exists() and not force_rebuild:
         logger.info("Loading existing vector store from %s", VECTOR_STORE_DIR)
