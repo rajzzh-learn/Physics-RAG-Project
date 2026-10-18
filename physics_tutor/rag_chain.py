@@ -105,6 +105,34 @@ def normalize_math(text: str) -> str:
     return "".join(parts)
 
 
+# ── Safe HTML rendering ────────────────────────────────────────────────────
+_ALLOWED_TAGS = {
+    "a", "b", "i", "u", "em", "strong", "sub", "sup", "br", "hr", "p", "div", "span",
+    "mark", "small", "code", "pre", "blockquote", "ul", "ol", "li", "details", "summary",
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "table", "thead", "tbody", "tfoot", "tr", "th", "td",
+}
+_ALLOWED_ATTRS = {"a": {"href", "title"}, "td": {"colspan", "rowspan"}, "th": {"colspan", "rowspan"}}
+
+
+def sanitize_html(text: str) -> str:
+    """Allow a safe subset of HTML in Markdown text (math and code untouched).
+
+    Scripts, styles, event handlers, iframes, forms and javascript: URLs are removed.
+    """
+    import nh3
+    parts = _PROTECTED.split(text)
+    for idx in range(0, len(parts), 2):
+        parts[idx] = nh3.clean(
+            parts[idx],
+            tags=_ALLOWED_TAGS,
+            attributes=_ALLOWED_ATTRS,
+            url_schemes={"http", "https", "mailto"},
+            link_rel="noopener noreferrer",
+        )
+    return "".join(parts)
+
+
 def trim_text(text: str, limit: int) -> str:
     return text if len(text) <= limit else text[:limit] + "\n…[truncated]"
 
