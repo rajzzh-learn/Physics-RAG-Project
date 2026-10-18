@@ -529,3 +529,33 @@ git commit -m "chore: rebuild vector store"
 ```
 
 The app also exposes a **🔄 Rebuild Vector Store** button in the sidebar for convenience.
+
+---
+
+## LLM Intelligence Stack (shared_tutor) — current behaviour
+
+> This section reflects the latest code and supersedes older flow diagrams or
+> library notes above (e.g. `StrOutputParser`, torch-based embeddings) where they differ.
+
+The LLM logic is no longer duplicated per subject. It lives in the
+[`CBSE-RAG-Shared`](https://github.com/rajzzh-learn/CBSE-RAG-Shared) package
+(`shared_tutor`), installed from GitHub and pinned by tag in `requirements.txt`.
+
+```
+Layer 1 — Retrieve   ChromaDB MMR search over this subject's PDFs
+Layer 2 — Generate   LLM (Groq / OpenAI / watsonx) answers using the retrieved context
+Layer 3 — Validate   Gemini fact-checks the answer (opt-in, ENABLE_VALIDATION=true)
+```
+
+| Concern | Where | Behaviour |
+|---|---|---|
+| LLM selection | `shared_tutor.rag_chain.build_llm()` | `LLM_PROVIDER` = `groq` / `openai` / `watsonx`. Groq has an automatic fallback model. `max_tokens` = 8192. |
+| Long answers | `shared_tutor.rag_chain.generate_full_answer()` | If the model stops because of the token limit (`finish_reason=length`), it is asked to continue (up to 4 times) and the parts are joined, so long answers are not cut off. |
+| Rate limits | `invoke_with_retry()` | Waits for the provider-advertised delay and retries. |
+| Chat history | `convert_history()` | Recent turns kept verbatim, older turns compacted to a character budget. |
+| Validation | `shared_tutor.validator.validate_answer()` | Gemini checks the answer against the retrieved context. Answers over 6000 characters are not validated (never clipped). Skipped if `GOOGLE_API_KEY` is missing. |
+| Embeddings | `<subject>_tutor/ingest.py` | ONNX `all-MiniLM-L6-v2` (`SafeMiniLMEmbeddings`) — same vectors as the HuggingFace model, no PyTorch, avoids the Streamlit Cloud meta-device `NotImplementedError`. Existing vector stores remain valid. |
+
+Required secrets / environment variables (see `.env.example`):
+`LLM_PROVIDER`, `GROQ_API_KEY` (or `OPENAI_API_KEY` / `WATSONX_*`),
+`GOOGLE_API_KEY` and `ENABLE_VALIDATION=true` for Layer 3.

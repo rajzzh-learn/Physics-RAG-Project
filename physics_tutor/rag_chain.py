@@ -139,10 +139,9 @@ def trim_text(text: str, limit: int) -> str:
 
 def build_rag_chain(vector_store):
     """Build the Physics RAG chain using the shared builder."""
-    from langchain_core.output_parsers import StrOutputParser
     from langchain_core.runnables import RunnableLambda, RunnablePassthrough
     from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-    from shared_tutor.rag_chain import build_llm, _format_docs
+    from shared_tutor.rag_chain import build_llm, _format_docs, generate_full_answer
 
     llm = build_llm()
     retriever = vector_store.as_retriever(
@@ -163,7 +162,8 @@ def build_rag_chain(vector_store):
             context=RunnableLambda(lambda x: _format_docs(x["source_documents"]))
         )
         | RunnablePassthrough.assign(
-            answer=prompt | llm | StrOutputParser() | RunnableLambda(normalize_math)
+            answer=RunnableLambda(lambda x: generate_full_answer(llm, prompt, x))
+            | RunnableLambda(normalize_math)
         )
     )
     return chain
